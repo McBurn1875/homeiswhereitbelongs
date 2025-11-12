@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Countdown — 22 december 2025</title>
+  <style>
+    :root{
+      --bg-overlay: rgba(0,0,0,0.35);
+      --accent: #ffd700; /* geel van de Zweedse vlag */
+      --white: #ffffff;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    .page{
+      position:relative;
+      min-height:100%;
+      width:100%;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      color:var(--white);
+      text-align:center;
+    }
+
+    /* Achtergrond vlag als eigen laag zodat we 'bewegende' indruk kunnen maken */
+    .bg-flag{
+      position:fixed;
+      inset:0;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Sweden.svg');
+      background-size:cover;
+      background-position:center center;
+      filter: saturate(120%) contrast(1.05);
+      transform-origin:center;
+      z-index:0;
+      will-change:transform, filter;
+      animation: float 6s ease-in-out infinite alternate;
+    }
+
+    /* subtiele golfachtige beweging en schaduwoverlay */
+    @keyframes float{
+      0%{ transform: translate3d(0,0,0) rotate(-0.6deg) scale(1.02); filter:blur(0.2px) saturate(1.05);} 
+      50%{ transform: translate3d(-18px,-8px,0) rotate(0.6deg) scale(1.03); filter:blur(0.6px) saturate(1.08);} 
+      100%{ transform: translate3d(0,-16px,0) rotate(-0.6deg) scale(1.02); filter:blur(0.2px) saturate(1.05);} 
+    }
+
+    /* donkere overlay om tekst leesbaar te houden */
+    .overlay{
+      position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.45));z-index:1;pointer-events:none;
+    }
+
+    .content{
+      position:relative;z-index:2;padding:3rem;max-width:1100px;width:100%;box-sizing:border-box;
+      display:flex;flex-direction:column;gap:1.5rem;align-items:center;justify-content:center;
+    }
+
+    h1{font-size:clamp(1.5rem,3.5vw,2.25rem);margin:0;font-weight:700;letter-spacing:0.02em}
+    p.lead{margin:0;opacity:0.95}
+
+    .countdown{
+      display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center;align-items:center;
+      margin-top:0.5rem;
+    }
+    .unit{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.08));
+      border-radius:12px;padding:0.9rem 1.2rem;min-width:86px;box-sizing:border-box;
+      backdrop-filter: blur(4px);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      color:var(--white);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+    .value{font-size:clamp(1.25rem,3.8vw,2.6rem);font-weight:800;color:var(--accent);line-height:1}
+    .label{font-size:0.75rem;opacity:0.95;text-transform:uppercase;letter-spacing:0.08em;margin-top:0.25rem}
+
+    /* responsief: grotere spacing op grote schermen */
+    @media (min-width:880px){
+      .unit{min-width:120px;padding:1.2rem 1.6rem;border-radius:16px}
+      .value{font-size:3.6rem}
+      h1{font-size:clamp(2rem,2.6vw,3rem)}
+    }
+
+    /* footer kleine hulpregel */
+    .note{margin-top:1rem;font-size:0.85rem;opacity:0.9}
+
+    /* toegankelijk focus states */
+    .unit:focus{outline:3px solid rgba(255,215,0,0.18);outline-offset:3px}
+
+  </style>
+</head>
+<body>
+  <div class="page" role="main">
+    <div class="bg-flag" aria-hidden="true"></div>
+    <div class="overlay" aria-hidden="true"></div>
+
+    <div class="content">
+      <h1>Countdown — 22 december 2025</h1>
+      <p class="lead">Nog even aftellen naar 22 december 2025</p>
+
+      <div id="countdown" class="countdown" aria-live="polite" aria-atomic="true">
+        <div class="unit" tabindex="0">
+          <div id="days" class="value">0</div>
+          <div class="label">Dagen</div>
+        </div>
+        <div class="unit" tabindex="0">
+          <div id="hours" class="value">00</div>
+          <div class="label">Uren</div>
+        </div>
+        <div class="unit" tabindex="0">
+          <div id="minutes" class="value">00</div>
+          <div class="label">Minuten</div>
+        </div>
+        <div class="unit" tabindex="0">
+          <div id="seconds" class="value">00</div>
+          <div class="label">Seconden</div>
+        </div>
+      </div>
+
+      <div class="note">Datum en tijd worden berekend in jouw browserlokale tijd.</div>
+    </div>
+  </div>
+
+  <script>
+    // Target: 22 December 2025 (lokale tijd van de browser)
+    const target = new Date(2025, 11, 22, 0, 0, 0); // maand is 0-index (11 = december)
+
+    const $days = document.getElementById('days');
+    const $hours = document.getElementById('hours');
+    const $minutes = document.getElementById('minutes');
+    const $seconds = document.getElementById('seconds');
+
+    function pad(n){return String(n).padStart(2,'0');}
+
+    function update(){
+      const now = new Date();
+      let diff = Math.max(0, target - now);
+
+      const secs = Math.floor(diff / 1000) % 60;
+      const mins = Math.floor(diff / (1000 * 60)) % 60;
+      const hrs = Math.floor(diff / (1000 * 60 * 60)) % 24;
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+      $days.textContent = days;
+      $hours.textContent = pad(hrs);
+      $minutes.textContent = pad(mins);
+      $seconds.textContent = pad(secs);
+
+      // als het voorbij is, stilzetten en boodschap
+      if (diff <= 0){
+        clearInterval(timer);
+        document.querySelector('.lead').textContent = 'Het is 22 december 2025!';
+      }
+    }
+
+    update();
+    const timer = setInterval(update, 1000);
+
+    // Optioneel: verbeter performantie op zichtbare tab door gebruik van visibilitychange
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) return; update();
+    });
+  </script>
+</body>
+</html>
